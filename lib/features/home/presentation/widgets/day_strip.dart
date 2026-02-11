@@ -13,8 +13,11 @@ class DayStrip extends StatelessWidget {
   final int selectedDay;
   final ValueChanged<int> onSelect;
 
+
   @override
   Widget build(BuildContext context) {
+    final accent = Theme.of(context).colorScheme.primary;
+
     return SizedBox(
       height: 56,
       child: ListView.separated(
@@ -32,8 +35,7 @@ class DayStrip extends StatelessWidget {
               width: 46,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white : AppColors.accent,
-                borderRadius: BorderRadius.circular(23),
+                color: isSelected ? Colors.white : accent,                borderRadius: BorderRadius.circular(23),
                 boxShadow: isSelected
                     ? [
                   BoxShadow(

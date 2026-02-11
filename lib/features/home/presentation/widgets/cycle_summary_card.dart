@@ -28,9 +28,9 @@ class CycleSummaryCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFFFFA2BD),
-              Color(0xFFFF6B9A),
-              Color(0xFFFFD6E3),
+              Color(0xFFC0B1F6),
+              Color(0xFFA782FF),
+              Color(0xFFCFC6F5),
             ],
           ),
           boxShadow: [
@@ -128,7 +128,7 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF51D7B6), // mint/yeşil
+        color: const Color(0xFF34EEB9), // mint/yeşil
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
