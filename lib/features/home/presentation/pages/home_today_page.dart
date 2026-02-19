@@ -15,13 +15,33 @@ class HomeTodayPage extends StatefulWidget {
 }
 
 class _HomeTodayPageState extends State<HomeTodayPage> {
-  int selectedDay = 6;
-  final days = List.generate(14, (i) => i + 1);
+  late DateTime focusedMonth;
+  late DateTime selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    focusedMonth = DateTime(now.year, now.month, 1); // ayın ilk günü
+    selectedDate = DateTime(now.year, now.month, now.day); // bugün
+  }
+
+  /// Ay kaç gün çekiyor?
+  int _daysInMonth(DateTime month) {
+    // Bir sonraki ayın 0. günü = bu ayın son günü
+    final lastDay = DateTime(month.year, month.month + 1, 0);
+    return lastDay.day;
+  }
+
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final brand = context.brand;
+    final dim = _daysInMonth(focusedMonth);
+    final now = DateTime.now();
+    final isCurrentMonth = now.year == focusedMonth.year && now.month == focusedMonth.month;
+
 
     return Scaffold(
       backgroundColor: brand.bgBottom,
@@ -52,9 +72,18 @@ class _HomeTodayPageState extends State<HomeTodayPage> {
                   padding:
                   const EdgeInsets.symmetric(horizontal: AppSizes.pageHPad),
                   child: DayStrip(
-                    days: days,
-                    selectedDay: selectedDay,
-                    onSelect: (d) => setState(() => selectedDay = d),
+                    daysInMonth: dim,
+                    selectedDay: selectedDate.day,
+                    todayDay: isCurrentMonth ? now.day : null, // ✅ bugünü kesikli halka ile göster
+                    initialScrollDay: DateTime.now().month == focusedMonth.month &&
+                        DateTime.now().year == focusedMonth.year
+                        ? DateTime.now().day
+                        : selectedDate.day,
+                    onSelect: (day) {
+                      setState(() {
+                        selectedDate = DateTime(focusedMonth.year, focusedMonth.month, day);
+                      });
+                    },
                   ),
                 ),
               ),

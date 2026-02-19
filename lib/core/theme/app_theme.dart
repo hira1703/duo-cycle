@@ -44,7 +44,7 @@ class AppTheme {
       bgBottom: Color(0xFF141420),   // koyu gri-mor
       card: Color(0xFF212131),       // card yüzeyi
       borderSoft: Color(0x26FFFFFF),
-      accent: Color(0xFFA78BFA),     // mor/lila vurgu
+      accent: Color(0xFF5532B9),     // mor/lila vurgu
       accent2: Color(0xFF6EE7D2),    // mint (koyu temada da iyi)
       textStrong: Color(0xFFF6F4F4),
       textSoft: Color(0xFF6EE7D2),
