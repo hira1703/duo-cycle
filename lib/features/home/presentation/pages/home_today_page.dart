@@ -6,7 +6,6 @@ import '../widgets/cycle_summary_card.dart';
 import '../../../../core/theme/theme_controller.dart';
 import '../../../../core/theme/app_brand_colors.dart'; // BrandX için
 
-
 class HomeTodayPage extends StatefulWidget {
   const HomeTodayPage({super.key});
 
@@ -17,6 +16,20 @@ class HomeTodayPage extends StatefulWidget {
 class _HomeTodayPageState extends State<HomeTodayPage> {
   late DateTime focusedMonth;
   late DateTime selectedDate;
+  static const List<String> _monthNamesTr = <String>[
+    'Ocak',
+    'Şubat',
+    'Mart',
+    'Nisan',
+    'Mayıs',
+    'Haziran',
+    'Temmuz',
+    'Ağustos',
+    'Eylül',
+    'Ekim',
+    'Kasım',
+    'Aralık',
+  ];
 
   @override
   void initState() {
@@ -26,22 +39,15 @@ class _HomeTodayPageState extends State<HomeTodayPage> {
     selectedDate = DateTime(now.year, now.month, now.day); // bugün
   }
 
-  /// Ay kaç gün çekiyor?
-  int _daysInMonth(DateTime month) {
-    // Bir sonraki ayın 0. günü = bu ayın son günü
-    final lastDay = DateTime(month.year, month.month + 1, 0);
-    return lastDay.day;
+  String _monthLabel(DateTime month) {
+    return '${_monthNamesTr[month.month - 1]} ${month.year}';
   }
-
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final brand = context.brand;
-    final dim = _daysInMonth(focusedMonth);
     final now = DateTime.now();
-    final isCurrentMonth = now.year == focusedMonth.year && now.month == focusedMonth.month;
-
 
     return Scaffold(
       backgroundColor: brand.bgBottom,
@@ -63,26 +69,38 @@ class _HomeTodayPageState extends State<HomeTodayPage> {
           child: CustomScrollView(
             slivers: [
               // ÜST BAR
-              SliverToBoxAdapter(child: _TopBar(theme: theme)),
+              SliverToBoxAdapter(
+                child: _TopBar(
+                  theme: theme,
+                  monthLabel: _monthLabel(focusedMonth),
+                ),
+              ),
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
               // GÜN SEÇİCİ
               SliverToBoxAdapter(
                 child: Padding(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: AppSizes.pageHPad),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.pageHPad,
+                  ),
                   child: DayStrip(
-                    daysInMonth: dim,
-                    selectedDay: selectedDate.day,
-                    todayDay: isCurrentMonth ? now.day : null, // ✅ bugünü kesikli halka ile göster
-                    initialScrollDay: DateTime.now().month == focusedMonth.month &&
-                        DateTime.now().year == focusedMonth.year
-                        ? DateTime.now().day
-                        : selectedDate.day,
-                    onSelect: (day) {
+                    selectedDate: selectedDate,
+                    todayDate: now,
+                    baseColor: brand.accent,
+                    onSelect: (date) {
                       setState(() {
-                        selectedDate = DateTime(focusedMonth.year, focusedMonth.month, day);
+                        selectedDate = date;
+                        focusedMonth = DateTime(date.year, date.month, 1);
                       });
+                    },
+                    onVisibleDateChanged: (date) {
+                      final newMonth = DateTime(date.year, date.month, 1);
+
+                      if (newMonth != focusedMonth) {
+                        setState(() {
+                          focusedMonth = newMonth;
+                        });
+                      }
                     },
                   ),
                 ),
@@ -99,7 +117,8 @@ class _HomeTodayPageState extends State<HomeTodayPage> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.pageHPad),
+                    horizontal: AppSizes.pageHPad,
+                  ),
                   child: Row(
                     children: [
                       Text(
@@ -125,7 +144,11 @@ class _HomeTodayPageState extends State<HomeTodayPage> {
               // HIZLI KAYIT AKSİYONLARI
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(
-                    AppSizes.pageHPad, 0, AppSizes.pageHPad, 24),
+                  AppSizes.pageHPad,
+                  0,
+                  AppSizes.pageHPad,
+                  24,
+                ),
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     children: [
@@ -171,8 +194,9 @@ class _HomeTodayPageState extends State<HomeTodayPage> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.theme});
+  const _TopBar({required this.theme, required this.monthLabel});
   final ThemeData theme;
+  final String monthLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +204,12 @@ class _TopBar extends StatelessWidget {
     final brand = context.brand;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSizes.pageHPad, 8, AppSizes.pageHPad, 0),
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.pageHPad,
+        8,
+        AppSizes.pageHPad,
+        0,
+      ),
       child: Row(
         children: [
           CircleAvatar(
@@ -190,14 +219,13 @@ class _TopBar extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            "Şubat",
+            monthLabel,
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w800,
               color: brand.textStrong,
             ),
           ),
           const SizedBox(width: 10),
-
 
           // THEME SWITCH (kaydırmalı)
           ValueListenableBuilder<ThemeMode>(
@@ -206,11 +234,12 @@ class _TopBar extends StatelessWidget {
               final isDark = mode == ThemeMode.dark;
               return Row(
                 children: [
-                  Icon(isDark ? Icons.dark_mode : Icons.light_mode, size: 18, color: brand.textStrong),
-                  Switch(
-                    value: isDark,
-                    onChanged: controller.toggle,
+                  Icon(
+                    isDark ? Icons.dark_mode : Icons.light_mode,
+                    size: 18,
+                    color: brand.textStrong,
                   ),
+                  Switch(value: isDark, onChanged: controller.toggle),
                 ],
               );
             },
@@ -220,7 +249,6 @@ class _TopBar extends StatelessWidget {
     );
   }
 }
-
 
 class _ActionTile extends StatelessWidget {
   const _ActionTile({
@@ -288,6 +316,7 @@ class _ActionTile extends StatelessWidget {
     );
   }
 }
+
 /// Home ekranının sağ alt köşesinde duran
 /// Takvim erişim butonu (Floating Action tarzı).
 class _CalendarFab extends StatelessWidget {
@@ -319,9 +348,7 @@ class _CalendarFab extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
 
           // Hafif çerçeve (light/dark modda uyumlu)
-          border: Border.all(
-            color: brand.borderSoft,
-          ),
+          border: Border.all(color: brand.borderSoft),
 
           // Derinlik hissi için gölge
           boxShadow: [
@@ -353,4 +380,3 @@ class _CalendarFab extends StatelessWidget {
     );
   }
 }
-
